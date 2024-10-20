@@ -1,0 +1,11 @@
+<model-viewer src="Suprisonda_tampa_plastico_moderna.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="1" camera-orbit="-209.5deg 59.71deg 1.617m" field-of-view="20.11deg" camera-target="0.07008m 0.01332m -0.151m" environment-image="legacy" exposure="0.88">
+    <div class="progress-bar hide" slot="progress-bar">
+        <div class="update-bar"></div>
+    </div>
+    <button slot="ar-button" id="ar-button">
+        View in your space
+    </button>
+    <div id="ar-prompt">
+        <img src="https://modelviewer.dev/shared-assets/icons/hand.png">
+    </div>
+</model-viewer>
