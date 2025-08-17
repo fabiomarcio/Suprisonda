@@ -1,4 +1,4 @@
-<model-viewer src="Suprisonda_caixa_plastico_4baias_2025.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="1" environment-image="legacy" auto-rotate camera-orbit="17.56deg 64.43deg 1.673m" field-of-view="20.11deg">
+<model-viewer src="Suprisonda_caixa_plastico_4baias_2025.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="1.65" auto-rotate exposure="0.58" shadow-softness="1" camera-orbit="-98.19deg 69.85deg 1.916m" field-of-view="26.26deg">
     <div class="progress-bar hide" slot="progress-bar">
         <div class="update-bar"></div>
     </div>
