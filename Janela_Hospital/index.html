@@ -30,7 +30,7 @@
             color: #ffffff;
             border: none;
             border-radius: 6px;
-            font-size: 16px;
+            font-size: 26px;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
@@ -62,7 +62,8 @@
             // Cria câmara e luz padrão automaticamente com base no modelo
             scene.createDefaultCameraOrLight(true, true, true);
             scene.activeCamera.useAutoRotationBehavior = false;
-
+scene.activeCamera.radius = 5;
+scene.activeCamera.alpha += Math.PI / 1.25;
             // Define o cursor do tipo "mãozinha" para objetos clicáveis
             scene.hoverCursor = "pointer";
 
