@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Modelo 3D Interativo</title>
+    <!-- Importa as bibliotecas necessárias da Babylon.js -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #renderCanvas {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+        /* Estilo do Botão HTML sobreposto */
+        .btn-ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            padding: 12px 24px;
+            background-color: #007acc;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .btn-ui:hover {
+            background-color: #005999;
+            transform: scale(1.03);
+        }
+        .btn-ui:active {
+            transform: scale(0.97);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Botão HTML -->
+    <button id="btnAtual" class="btn-ui">Atual</button>
+
+    <canvas id="renderCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById("renderCanvas");
+        const engine = new BABYLON.Engine(canvas, true);
+
+        const createScene = function () {
+            const scene = new BABYLON.Scene(engine);
+
+            // Cria câmara e luz padrão automaticamente com base no modelo
+            scene.createDefaultCameraOrLight(true, true, true);
+            scene.activeCamera.useAutoRotationBehavior = false;
+
+            // Define o cursor do tipo "mãozinha" para objetos clicáveis
+            scene.hoverCursor = "pointer";
+
+            // Lista com a relação entre cada objeto e a sua respetiva animação importada
+            const configuracaoObjetos = [
+                // Telas
+                { meshName: "Tela_001", animName: "tela_01" },
+                { meshName: "Tela_002", animName: "tela_02" },
+                { meshName: "Tela_003", animName: "tela_03" },
+                { meshName: "Tela_004", animName: "tela_04" },
+
+                // Janelas
+                { meshName: "Janela_001", animName: "janela_01" },
+                { meshName: "Janela_002", animName: "janela_02" },
+                { meshName: "Janela_003", animName: "janela_03" },
+                { meshName: "Janela_004", animName: "janela_04" }
+            ];
+
+            // Carrega o ficheiro GLB
+            BABYLON.SceneLoader.Append("./", "teste.glb", scene, function (scene) {
+                
+    // ==========================================
+    // PARA TODAS AS ANIMAÇÕES AO INICIAR
+    // ==========================================
+    scene.animationGroups.forEach(function (animacao) {
+        animacao.stop();
+    });
+
+                // Configuração dos cliques individuais nos objetos 3D
+                configuracaoObjetos.forEach(item => {
+                    const objetoClicavel = scene.getMeshByName(item.meshName);
+
+                    if (objetoClicavel) {
+                        objetoClicavel.actionManager = new BABYLON.ActionManager(scene);
+                        let estadoAberto = false;
+
+                        objetoClicavel.actionManager.registerAction(
+                            new BABYLON.ExecuteCodeAction(
+                                BABYLON.ActionManager.OnPickTrigger,
+                                function () {
+                                    const animacao = scene.getAnimationGroupByName(item.animName);
+                                    
+                                    if (animacao) {
+                                        if (!estadoAberto) {
+                                            animacao.play(false);
+                                        } else {
+                                            animacao.start(false, -1, animacao.to, animacao.from);
+                                        }
+                                        estadoAberto = !estadoAberto;
+                                    } else {
+                                        console.warn(`Animação '${item.animName}' não encontrada.`);
+                                    }
+                                }
+                            )
+                        );
+                    }
+                });
+
+                // =========================================================
+                // LÓGICA DO BOTÃO "ATUAL" (Mover no eixo X via Código)
+                // =========================================================
+                const btnAtual = document.getElementById("btnAtual");
+                let emPosicaoAtual = false;
+
+                // Função auxiliar para animar suavemente a posição X de qualquer objeto
+                function animarPosicaoX(mesh, deslocamentoX, duracaoFrames = 30) {
+                    const frameRate = 60;
+                    const animX = new BABYLON.Animation(
+                        "animX",
+                        "position.z",
+                        frameRate,
+                        BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+                        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
+                    );
+
+                    const posInicial = mesh.position.z;
+                    const posFinal = posInicial + deslocamentoX;
+
+                    const keyFrames = [
+                        { frame: 0, value: posInicial },
+                        { frame: duracaoFrames, value: posFinal }
+                    ];
+
+                    animX.setKeys(keyFrames);
+                    mesh.animations = [animX];
+                    scene.beginAnimation(mesh, 0, duracaoFrames, false);
+                }
+
+                btnAtual.addEventListener("click", function () {
+                    // Lista dos objetos que vão mover no eixo X ao clicar no botão
+                    const nomesObjetosParaMover = [
+                        "Tela_001", "Tela_002", "Tela_003", "Tela_004", 
+                        "Moldura"
+                    ];
+
+                    // Define a distância a mover (positivo no 1º clique, negativo para retornar no 2º clique)
+                    const distanciaX = 2.0; // Ajuste este valor conforme a distância desejada na sua cena
+                    const deslocamento = emPosicaoAtual ? -distanciaX : distanciaX;
+
+                    nomesObjetosParaMover.forEach(nome => {
+                        const mesh = scene.getMeshByName(nome);
+                        if (mesh) {
+                            animarPosicaoX(mesh, deslocamento, 30); // 30 frames de duração
+                        } else {
+                            console.warn(`Objeto '${nome}' não encontrado para mover.`);
+                        }
+                    });
+
+                    // Alterna o estado do botão
+                    emPosicaoAtual = !emPosicaoAtual;
+                });
+
+                // Iluminação PBR e ambiente
+               // scene.createDefaultEnvironment({
+              //      createGround: false,
+              //      skyboxSize: 1000
+              //  });
+
+              // =========================================================
+// HDRI - ROLLING HILLS
+// =========================================================
+const hdrTexture = new BABYLON.HDRCubeTexture(
+    "./rolling_hills_2k.hdr",
+    scene,
+    2048,
+    true,
+    false,
+    false,
+    true
+);
+
+// Usa o HDRI para iluminar a cena
+scene.environmentTexture = hdrTexture;
+
+// Cria o céu visível usando o HDRI
+scene.createDefaultSkybox(
+    hdrTexture,
+    true,
+    1000,
+    0.3
+);
+            });
+
+            return scene;
+        };
+
+        const scene = createScene();
+
+        // Loop de renderização contínuo
+        engine.runRenderLoop(function () {
+            scene.render();
+        });
+
+        // Ajusta o tamanho da tela ao redimensionar a janela
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    </script>
+
+</body>
+</html>
