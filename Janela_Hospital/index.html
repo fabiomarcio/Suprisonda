@@ -182,29 +182,7 @@ scene.activeCamera.alpha += Math.PI / 1.25;
               //      skyboxSize: 1000
               //  });
 
-              // =========================================================
-// HDRI - ROLLING HILLS
-// =========================================================
-const hdrTexture = new BABYLON.HDRCubeTexture(
-    "./rolling_hills_1k.hdr",
-    scene,
-    2048,
-    true,
-    false,
-    false,
-    true
-);
 
-// Usa o HDRI para iluminar a cena
-scene.environmentTexture = hdrTexture;
-
-// Cria o céu visível usando o HDRI
-scene.createDefaultSkybox(
-    hdrTexture,
-    true,
-    1000,
-    0.3
-);
             });
 
             return scene;
